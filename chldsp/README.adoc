@@ -2,8 +2,21 @@
 
 [source,bash]
 ----
+# Make a password hash using mkpasswd
+HASH=$(mkpasswd -m bcrypt)
+
+# Use sed to replace the password hash in the main.rs file in the line that begins with `static HASH`
+sed -i -E -e "/static HASH/s;\".*\";\"${HASH}\";" src/main.rs
+
+# Test using cargo run
 cargo run -- echo "Hello" "world."
+
+# Compile statically for musl
 rustup target add x86_64-unknown-linux-musl
 cargo build --release --target=x86_64-unknown-linux-musl
 target/x86_64-unknown-linux-musl/release/chldsp echo "Hello" "world."
+
+# Restore main.rs, because we don't want to commit password hashes to git!
+git restore src/main.rs
+
 ----
